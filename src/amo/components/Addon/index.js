@@ -7,6 +7,8 @@ import Helmet from 'react-helmet';
 import { connect } from 'react-redux';
 
 import { setViewContext } from 'amo/actions/viewContext';
+import AddonBadges from 'amo/components/AddonBadges';
+import AddonsCard from 'amo/components/AddonsCard';
 import AddonCompatibilityError from 'amo/components/AddonCompatibilityError';
 import AddonMeta from 'amo/components/AddonMeta';
 import AddonMoreInfo from 'amo/components/AddonMoreInfo';
@@ -42,8 +44,6 @@ import Card from 'ui/components/Card';
 import Icon from 'ui/components/Icon';
 import LoadingText from 'ui/components/LoadingText';
 import ShowMoreCard from 'ui/components/ShowMoreCard';
-import Badge from 'ui/components/Badge';
-import AddonsCard from 'amo/components/AddonsCard';
 
 import './styles.scss';
 
@@ -130,19 +130,6 @@ export class AddonBase extends React.Component {
 
   onClick = (event) => {
     this.props.toggleThemePreview(event.currentTarget);
-  }
-
-  getFeaturedText(addonType) {
-    const { i18n } = this.props;
-
-    switch (addonType) {
-      case ADDON_TYPE_EXTENSION:
-        return i18n.gettext('Featured Extension');
-      case ADDON_TYPE_THEME:
-        return i18n.gettext('Featured Theme');
-      default:
-        return i18n.gettext('Featured Add-on');
-    }
   }
 
   dispatchFetchOtherAddonsByAuthors({ addon }) {
@@ -451,18 +438,12 @@ export class AddonBase extends React.Component {
     const addonPreviews = addon ? addon.previews : [];
 
     let isCompatible = false;
-    let isExperimental = false;
-    let isFeatured = false;
-    let isRestartRequired = false;
     let compatibility;
     if (addon) {
       compatibility = getClientCompatibility({
         addon, clientApp, userAgentInfo,
       });
       isCompatible = compatibility.compatible;
-      isExperimental = addon.is_experimental;
-      isFeatured = addon.is_featured;
-      isRestartRequired = addon.isRestartRequired;
     }
 
     const numberOfAddonsByAuthors = addonsByAuthors ? addonsByAuthors.length : 0;
@@ -485,43 +466,26 @@ export class AddonBase extends React.Component {
         <div className="Addon-header-wrapper">
           <Card className="Addon-header-info-card" photonStyle>
             <header className="Addon-header">
-              <h1 className="Addon-title" {...titleProps} />
-              <p className="Addon-summary" {...summaryProps} />
-
-              <div className="Addon-badges">
-                {isFeatured ? (
-                  <Badge
-                    type="featured"
-                    label={this.getFeaturedText(addonType)}
-                  />
-                ) : null}
-                {isRestartRequired ? (
-                  <Badge
-                    type="restart-required"
-                    label={i18n.gettext('Restart Required')}
-                  />
-                ) : null}
-                {isExperimental ? (
-                  <Badge
-                    type="experimental"
-                    label={i18n.gettext('Experimental')}
-                  />
-                ) : null}
-              </div>
-
-              {addon ?
-                <InstallButton
-                  {...this.props}
-                  className="Button--wide"
-                  disabled={!isCompatible}
-                  ref={(ref) => { this.installButton = ref; }}
-                  src={src}
-                  status={installStatus}
-                  useButton
-                /> : null
-              }
-
               {this.headerImage({ compatible: isCompatible })}
+
+              <AddonBadges addon={addon} />
+
+              <h1 className="Addon-title" {...titleProps} />
+
+              <div className="Addon-summary-and-install-button-wrapper">
+                <p className="Addon-summary" {...summaryProps} />
+
+                {addon ?
+                  <InstallButton
+                    {...this.props}
+                    disabled={!isCompatible}
+                    ref={(ref) => { this.installButton = ref; }}
+                    src={src}
+                    status={installStatus}
+                    useButton
+                  /> : null
+                }
+              </div>
 
               <h2 className="visually-hidden">
                 {i18n.gettext('Extension Metadata')}

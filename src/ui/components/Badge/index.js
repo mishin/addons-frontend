@@ -33,10 +33,10 @@ const Badge = ({ label, type }: Props) => {
   }
 
   return (
-    <span className={type ? `Badge Badge-${type}` : 'Badge'}>
+    <div className={type ? `Badge Badge-${type}` : 'Badge'}>
+    {label}
       {type && <Icon alt={label} name={getIconNameForType(type)} />}
-      {label}
-    </span>
+    </div>
   );
 };
 
